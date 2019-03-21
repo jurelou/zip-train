@@ -166,10 +166,9 @@ pre {
 }
 
 form{
-  position: absolute;
-  top: 50%;
+  position: relative;
+  top: 10%;
   left: 50%;
-  margin-top: -100px;
   margin-left: -250px;
   width: 500px;
   height: 200px;
@@ -399,4 +398,13 @@ table tr.dir td:first-of-type a {
     text-align: center;
   padding: 20px 0 12px 0;
   margin: 0;
+}
+
+img{
+    width:100%;
+    max-width:200px;
+    max-height:100px;
+    position: relative;
+    margin-top:20%;
+    margin-left:30px;
 }

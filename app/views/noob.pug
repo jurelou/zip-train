@@ -14,4 +14,7 @@ block content
   form(method='POST' action="/upload?level=noob" enctype="multipart/form-data")
     input(type='file' name='avatea' id='file')
     p Drag your files here or click in this area.
-    button(type='submit') Upload 
+    button(type='submit') Upload
+  if files
+    for file in files
+      img(src!=file)

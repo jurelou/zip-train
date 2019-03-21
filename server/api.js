@@ -73,7 +73,9 @@ api.get('/pictures', (req, res) => {
 })
 
 api.get('/noob', (req, res) => {
-  res.render('views/noob')
+fs.readdir(__dirname + '/../public/pictures', function(error, data){
+  res.render('views/noob', {files: data})
+});  
 })
 
 function noob(data, file){
@@ -127,7 +129,7 @@ api.post('/upload', (req, res) => {
 
 
 api.get('*', (req, res) => {
-	res.redirect('/');
+  res.redirect('/');
 })
 
 module.exports = api
