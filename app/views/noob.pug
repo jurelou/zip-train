@@ -1,0 +1,17 @@
+extends ./layout
+
+block content
+  if error
+    h1.red #{error}
+  else if msg
+    a.green(href='/pictures')
+      h1.green #{msg}
+  else
+    if nope
+      h1.red #{nope}
+    else 
+      h1 Hey! upload your best selfie please
+  form(method='POST' action="/upload?level=noob" enctype="multipart/form-data")
+    input(type='file' name='avatea' id='file')
+    p Drag your files here or click in this area.
+    button(type='submit') Upload 

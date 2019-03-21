@@ -1,0 +1,24 @@
+extends ./layout
+
+block content
+  table.sortable
+    thead
+      tr
+        th filetype
+        th Filename
+        th uid:gid
+        th Size (bytes)
+        th Date Modified
+    tbody
+      for file in files
+        tr.file
+          td
+            a.name(href='/pictures?url=' + file.name) #{file.type}
+          td
+            a.name(href='/pictures?url=' + file.name) #{file.name}
+          td
+            a(href='/pictures?url=' + file.name)  #{file.uid}:#{file.gid}
+          td(sorttable_customkey='32')
+            a(href='/pictures?url=' + file.name) #{file.size}
+          td(sorttable_customkey='20120621031204')
+            a(href='/pictures?url=' + file.name) #{file.time}

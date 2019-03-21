@@ -1,0 +1,40 @@
+
+
+//- layout.pug
+html
+  head
+    title zip-train
+    meta(name='author', content='Louis JURCZYK <louis@jurczyk.fr>')
+    meta(name='viewport', content='initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width')
+    meta(property='og:title', content='zip-train')
+    meta(property='og:description', content='zip-train')
+    meta(property='og:type', conten t='website')
+    meta(property='og:site_name', content='zip-train')
+    meta(itemprop='name', content='zip-train')
+    meta(itemprop='description', content='zip-train')
+    script(src='http://code.jquery.com/jquery.js')
+
+  style
+    include ../dist/index.css
+
+  body
+
+    section.page-header
+      h1.project-name Zip-train
+      h2.project-tagline Choose your level
+      a.btn(href='/noob') noob
+      a.btn(href='/noob') noob
+      a.btn(href='/noob') noob
+      a.btn(href='/noob') noob
+      a.btn(href='/noob') noob
+    block content
+
+
+
+  block scripts  
+  script(type="text/javascript").
+    $(document).ready(function(){
+      $('form input').change(function () {
+        $('form p').text(document.getElementById('file').files[0].name + " (" + document.getElementById('file').files[0].size + " octets)");
+      });
+    });
