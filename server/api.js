@@ -29,10 +29,18 @@ api.get('/pictures', (req, res) => {
           good_path = url;
       } else if (stats.isFile() && isSubdir) {
                   cont = false;
-        fs.readFile(url, 'utf8', function(err, contents) {
-          res.send(contents);
-          res.end()});
-      }
+        fs.open(url, 'r', function(status, fd) {
+            if (status) {
+              res.send(status.message);
+              res.end();
+            }
+            var buffer = new Buffer(500);
+            fs.read(fd, buffer, 0, 500, 0, function(err, num) {
+              res.send(buffer.toString('utf-8', 0, num));
+              res.end();
+            });
+        });
+       }
   }
   catch (e) {  }
   if (cont){
@@ -73,9 +81,18 @@ api.get('/pictures', (req, res) => {
 })
 
 api.get('/noob', (req, res) => {
-fs.readdir(__dirname + '/../public/pictures', function(error, data){
-  res.render('views/noob', {files: data})
-});  
+  console.log("lllllllllllllllllllll", req.query.s)
+  fs.readdir(__dirname + '/../public/pictures', function(error, data){
+    if (req.query.s && req.query.s == "err"){
+      return res.render("views/noob", {files: data, error: "Oooopssss something went wrong ......."})
+    }
+    else if (req.query.s && req.query.s == "nope")
+      return res.render("views/noob", {files: data, nope: "nope :)"})
+    else if (req.query.s && req.query.s == "ok")
+      return res.render("views/noob", {files: data, msg: "Files uploaded here"})
+    else
+      return res.render("views/noob", {files: data})
+  });  
 })
 
 function noob(data, file){
@@ -84,7 +101,8 @@ function noob(data, file){
 
 api.post('/upload', (req, res) => {
   let nope = false
-
+  console.log(req.query.level)
+  console.log("@@@@@@@@@@@@@@",req.originalUrl.split('?')[0])
   var form = new formidable.IncomingForm()
   form.uploadDir= __dirname + '/../public/pictures/'
   form.keepExtensions= true
@@ -114,20 +132,16 @@ api.post('/upload', (req, res) => {
 
 
     form.parse(req, function(err, fields, files) {
-      console.log(fields, "jjjjjjjj", files.avatea)
-
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@" + '/' + req.query.level + '?s=err')
       if (error)
-        res.render("views/" + req.query.level, {error: "Oooopssss something went wrong ......."})
+        return res.redirect('/noob?s=err')
       else if (nope)
-        res.render("views/" + req.query.level, {nope: "nope :)"})
+        return res.redirect('/' + req.query.level + '?s=nope')
       else
-        res.render("views/" + req.query.level, {msg: "Files uploaded here"})
+        return res.redirect('/' + req.query.level + '?s=ok')
     })
   
 })
-
-
-
 api.get('*', (req, res) => {
   res.redirect('/');
 })

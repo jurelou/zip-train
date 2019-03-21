@@ -17,4 +17,4 @@ block content
     button(type='submit') Upload
   if files
     for file in files
-      img(src!=file)
+      img(src!='static/' + file)
