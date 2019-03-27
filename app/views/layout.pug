@@ -22,9 +22,11 @@ html
     section.page-header
       h1.project-name Zip-train
       h2.project-tagline Choose your level
-      a.btn(href='/noob') noob
+      a.btn(href='/noob') newbie
+      a.btn(href='/lamer') lamer
       br
       a.btn(href='/pictures') File structure overview
+      a.btn(href='/', onclick="return confirm('Are you sure?')") Remove all my files
     block content
 
 

@@ -15,7 +15,7 @@ api.get('/', (req, res) => {
   res.render('views/index')
 })
 
-api.get('/pictures', (req, res) => {
+api.get('/pictures', (req, res) => {  
   const url = req.query.url ? './public/' + req.session.id + '/' + req.query.url : './public/' + req.session.id;  
   const relative = path.relative('./public/' + req.session.id, url);
   const isSubdir = /*relative &&*/ relative.indexOf("..") > -1 ? false: true/*&& !path.isAbsolute(relative)*/;
