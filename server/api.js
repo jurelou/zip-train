@@ -16,20 +16,20 @@ api.get('/', (req, res) => {
 })
 
 api.get('/pictures', (req, res) => {
-  console.log(req.session.id)
   const url = req.query.url ? './public/' + req.session.id + '/' + req.query.url : './public/' + req.session.id;  
   const relative = path.relative('./public/' + req.session.id, url);
-  const isSubdir = /*relative &&*/ !relative.startsWith('..') /*&& !path.isAbsolute(relative)*/;
+  const isSubdir = /*relative &&*/ relative.indexOf("..") > -1 ? false: true/*&& !path.isAbsolute(relative)*/;
   let good_path = './public/' + req.session.id;
-  let cont = true;
+  let cont = true;     
   try {
       stats = fs.lstatSync(url);
+      if (stats.isSymbolicLink() && isSubdir)  {
+        stats = fs.lstatSync(fs.realpathSync(url));
+      }
       if (stats.isDirectory() && isSubdir)  {
           good_path = url;
       } else if (stats.isFile() && isSubdir) {
         cont = false;
-
-
         fs.open(url, 'r', function(status, fd) {
             if (status) {
               res.send(status.message);
@@ -41,10 +41,10 @@ api.get('/pictures', (req, res) => {
               res.end();
             });
         });
-
        }
   }
-  catch (e) {  }
+  catch (e) {  console.log(e)}
+
   if (cont){
   let files  =  [{
     size : "-",

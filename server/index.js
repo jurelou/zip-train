@@ -39,10 +39,24 @@ app.use('/js', express.static(path.resolve(__dirname, '../app/assets/js')))
 
 app.use(api)
 
-var j = schedule.scheduleJob('1 * * * *', function(){
+
+var j = schedule.scheduleJob('0 * * * *', function(){
+	fs.readdir('./public/', (err, files) => {
+  		files.forEach(file => {
+    		fs.lstat('./public/' + file, (err, stat) => {
+    			if (!err && stat.isDirectory)
+					rimraf('./public/' + file + '/*', function(){})
+    		})
+  		});
+	});	
+});
+
+var j = schedule.scheduleJob('0 1 * * *', function(){
 	rimraf('./public/*', function () { console.log('done'); });
 	rimraf('./public/.*', function () { console.log('done'); });
 });
+
+
 
 const server = app.listen(app.get('port'), () => {
   log.info(`Express server started on http://localhost:${server.address().port}`)
