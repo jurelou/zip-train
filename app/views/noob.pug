@@ -4,7 +4,6 @@ block content
   if error
     h1.red #{error}
   else if msg
-    a.green(href='/pictures')
       h1.green #{msg}
   else
     if nope
@@ -15,6 +14,7 @@ block content
     input(type='file' name='avatea' id='file')
     p Drag your files here or click in this area.
     button(type='submit') Upload
+  br
   if files
     for file in files
       img(src!='static/' + file)

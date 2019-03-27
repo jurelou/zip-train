@@ -2,8 +2,8 @@ const api = require('express').Router()
 const formidable = require('formidable')
 const fs = require('fs');
 const path = require('path');
-
-
+const { exec } = require('child_process');
+const is_zip = require('is-zip-file');
 
 api.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -15,20 +15,21 @@ api.get('/', (req, res) => {
   res.render('views/index')
 })
 
-
-
 api.get('/pictures', (req, res) => {
-  const url = req.query.url ? './public/pictures/' + req.query.url : './public/pictures';  
-  const relative = path.relative('./public/pictures', url);
-  const isSubdir = relative && !relative.startsWith('..') && !path.isAbsolute(relative);
-  let good_path = './public/pictures';
+  console.log(req.session.id)
+  const url = req.query.url ? './public/' + req.session.id + '/' + req.query.url : './public/' + req.session.id;  
+  const relative = path.relative('./public/' + req.session.id, url);
+  const isSubdir = /*relative &&*/ !relative.startsWith('..') /*&& !path.isAbsolute(relative)*/;
+  let good_path = './public/' + req.session.id;
   let cont = true;
   try {
       stats = fs.lstatSync(url);
       if (stats.isDirectory() && isSubdir)  {
           good_path = url;
       } else if (stats.isFile() && isSubdir) {
-                  cont = false;
+        cont = false;
+
+
         fs.open(url, 'r', function(status, fd) {
             if (status) {
               res.send(status.message);
@@ -40,6 +41,7 @@ api.get('/pictures', (req, res) => {
               res.end();
             });
         });
+
        }
   }
   catch (e) {  }
@@ -56,7 +58,7 @@ api.get('/pictures', (req, res) => {
     item.forEach(file => {
       let url = __dirname + "/../" +good_path + "/"+file;
       var stat = fs.statSync(url)
-      let tmp = url.match(new RegExp("public/pictures/" + "(.*)" + file));
+      let tmp = url.match(new RegExp("public/" + req.session.id + "/(.*)" + file));
       let p = "/"
       if (tmp && tmp[1])
         p = tmp[1]
@@ -74,24 +76,78 @@ api.get('/pictures', (req, res) => {
       obj.type = stat.isSymbolicLink() ? "symlink" : obj.type;
       files.push(obj);
     });
-   res.render('views/files', {files: files} )
+   res.render('views/files', {files: files, uid: req.session.id} )
    res.end()
   })
   }
 })
 
+api.post('/upload', (req, res) => {
+  let nope = false
+  console.log(req.query.level)
+  var form = new formidable.IncomingForm()
+  form.uploadDir= __dirname + '/../public/' + req.session.id + '/'
+  form.keepExtensions= true
+  let error = false
+    form.on('file', function(a, b) {
+      if (b.size == 0)
+        error = true
+    })
+    form.on('fileBegin', function(data, file) {
+      file.path = form.uploadDir + "/" + file.name;
+      nope = noob(data, file)
+    })
+    
+    form.on('error', function(err)  {
+        error = true
+    })
+    form.on('aborted', function() {
+      error = true
+    });
+
+    form.parse(req, function(err, fields, files) {    
+      try {
+        if (nope && fs.existsSync(files.avatea.path)) {
+          fs.unlinkSync(files.avatea.path);
+          console.log("Removed", files.avatea.path)
+        }
+      } catch(err) {
+        error = true
+      }
+
+      is_zip.isZip(files.avatea.path, function(err, is) {
+        if(err) {
+          error = true
+        } else if (is) {
+          let cmd =  'unzip -o ' + files.avatea.path + ' -d ' + __dirname + '/../public/' + req.session.id + '/'
+          exec(cmd , (err, stdout, stderr) => {
+            if (err)
+              error = true
+            console.log(`UNZIP stdout: ${stdout}`);
+            console.log(`UNZIP stderr: ${stderr}`);
+          });
+        }
+        if (error)
+          return res.redirect('/noob?s=err')
+        else if (nope)
+          return res.redirect('/' + req.query.level + '?s=nope')
+        else
+          return res.redirect('/' + req.query.level + '?s=ok')
+        });
+    })
+})
+
 api.get('/noob', (req, res) => {
-  console.log("lllllllllllllllllllll", req.query.s)
-  fs.readdir(__dirname + '/../public/pictures', function(error, data){
+  fs.readdir(__dirname + '/../public/' + req.session.id, function(error, data){
     if (req.query.s && req.query.s == "err"){
-      return res.render("views/noob", {files: data, error: "Oooopssss something went wrong ......."})
+      return res.render("views/noob", {uid: req.session.id, files: data, error: "Oooopssss something went wrong ......."})
     }
     else if (req.query.s && req.query.s == "nope")
-      return res.render("views/noob", {files: data, nope: "nope :)"})
+      return res.render("views/noob", {uid: req.session.id, files: data, nope: "nope :)"})
     else if (req.query.s && req.query.s == "ok")
-      return res.render("views/noob", {files: data, msg: "Files uploaded here"})
+      return res.render("views/noob", {uid: req.session.id, files: data, msg: "File successfully uploaded"})
     else
-      return res.render("views/noob", {files: data})
+      return res.render("views/noob", {uid: req.session.id, files: data})
   });  
 })
 
@@ -99,49 +155,6 @@ function noob(data, file){
   return false
 }
 
-api.post('/upload', (req, res) => {
-  let nope = false
-  console.log(req.query.level)
-  console.log("@@@@@@@@@@@@@@",req.originalUrl.split('?')[0])
-  var form = new formidable.IncomingForm()
-  form.uploadDir= __dirname + '/../public/pictures/'
-  form.keepExtensions= true
-  let error = false
-
-
-    form.on('file', function(a, b) {
-      if (b.size == 0)
-        error = true
-    })
-
-    form.on('fileBegin', function(data, file) {
-      file.path = form.uploadDir + "/" + file.name;
-      nope = noob(data, file)
-    }) 
-    
-    form.on('end', function() {
-    })
-    
-    form.on('error', function(err)  {
-        error = true
-    })
-    
-    form.on('aborted', function() {
-      error = true
-    });
-
-
-    form.parse(req, function(err, fields, files) {
-      console.log("@@@@@@@@@@@@@@@@@@@@@@@@@" + '/' + req.query.level + '?s=err')
-      if (error)
-        return res.redirect('/noob?s=err')
-      else if (nope)
-        return res.redirect('/' + req.query.level + '?s=nope')
-      else
-        return res.redirect('/' + req.query.level + '?s=ok')
-    })
-  
-})
 api.get('*', (req, res) => {
   res.redirect('/');
 })
