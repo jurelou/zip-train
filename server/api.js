@@ -22,6 +22,8 @@ api.get('/', (req, res) => {
 })
 
 api.get('/pictures', (req, res) => {
+  if (!fs.existsSync("./public/" + req.session.id))
+    fs.mkdirSync("./public/" + req.session.id);
   const url = req.query.url ? './public/' + req.session.id + '/' + req.query.url : './public/' + req.session.id;  
   const relative = path.relative('./public/' + req.session.id, url);
   const isSubdir = /*relative &&*/ relative.indexOf("..") > -1 ? false: true/*&& !path.isAbsolute(relative)*/;
@@ -193,14 +195,20 @@ function uploadPage(req, res, page) {
 }
 
 api.get('/noob', (req, res) => {
+  if (!fs.existsSync("./public/" + req.session.id))
+    fs.mkdirSync("./public/" + req.session.id);
   return uploadPage(req, res, "views/noob")
 })
 
 api.get('/lamer', (req, res) => {
+  if (!fs.existsSync("./public/" + req.session.id))
+    fs.mkdirSync("./public/" + req.session.id);
   return uploadPage(req, res, "views/lamer") 
 })
 
 api.get('/programmer', (req, res) => {
+  if (!fs.existsSync("./public/" + req.session.id))
+    fs.mkdirSync("./public/" + req.session.id);
   if (req.query.s) {
     req.query.s = req.query.s.replace('<', '/')
     req.query.s = req.query.s.replace('>', '/')
