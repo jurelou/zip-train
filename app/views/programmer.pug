@@ -6,13 +6,15 @@ block content
   else if msg
       h1.green #{msg}
   else if secureInput
-      h1.green !{secureInput}
+      h1
+        a(style="text-decoration: none; color: #9e9e9e" href!=secureInput) This is a safe area, you can't do anything here YET
   else
     if nope
       h1.red #{nope}
     else 
-      h1 Hey! upload your best selfie please
-  form(method='POST' action="/upload?level=noob" enctype="multipart/form-data")
+      h1 
+        a(style="text-decoration: none; color: #9e9e9e") This is a safe area, you can't do anything here YET
+  form(method='POST' action="/upload?level=programmer" enctype="multipart/form-data")
     input(type='file' name='avatea' id='file')
     p Drag your files here or click in this area.
     button(type='submit') Upload

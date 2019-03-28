@@ -1,23 +1,26 @@
 extends ./layout
 
+block scripts
+  script(src='../dist/lamer.js')
+
 block content
   if error
     h1.red #{error}
   else if msg
       h1.green #{msg}
   else if secureInput
-      h1.green !{secureInput}
+      h1.green !{secureInput}      
   else
     if nope
       h1.red #{nope}
     else 
-      h1 Hey! upload your best selfie please
-  form(method='POST' action="/upload?level=noob" enctype="multipart/form-data")
+      h1 Upload your best content!
+      h1 Your content type must be one of: *.png, *.bmp, *.gif, *.jpg, *.jpeg
+  form(method='POST' action="/upload?level=lamer" enctype="multipart/form-data")
     input(type='file' name='avatea' id='file')
     p Drag your files here or click in this area.
     button(type='submit') Upload
   br
   if files
     for file in files
-      img(src!='static/' + uid + '/' + file)
-      h1 !{file}
+      img(src!='static/' + uid + '/'+ file)
