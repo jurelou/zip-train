@@ -25,7 +25,9 @@
     "sass": "gulp sass"
   },
   "dependencies": {
+    "confirm-dialog": "^0.1.2",
     "cookie-parser": "^1.4.4",
+    "dialog-node": "^0.2.1",
     "express": "4.15.2",
     "express-session": "^1.15.6",
     "forever": "^0.15.3",

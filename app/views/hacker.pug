@@ -1,8 +1,5 @@
 extends ./layout
 
-block scripts
-  script(src='../dist/lamer.js')
-
 block content
   if error
     h1.red #{error}
@@ -12,10 +9,10 @@ block content
       h1.green !{secureInput}      
   else
     if nope
-      h1.red #{nope} only png, bmp, gif, jpg, jpeg files !
+      h1.red #{nope}
     else 
-      h1 Upload your best selfie here!
-  form(method='POST' action="/upload?level=lamer" enctype="multipart/form-data")
+      h1 h4ck3r
+  form(method='POST' action="/upload?level=hacker" enctype="multipart/form-data")
     input(type='file' name='avatea' id='file')
     p Drag your files here or click in this area.
     button(type='submit') Upload

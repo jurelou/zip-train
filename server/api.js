@@ -5,6 +5,8 @@ const path = require('path');
 const { exec } = require('child_process');
 const is_zip = require('is-zip-file');
 const rimraf = require('rimraf');
+var dialog = require('dialog-node');
+
 
 api.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -12,13 +14,10 @@ api.use((req, res, next) => {
   next() 
 })
 
+
 api.get('/remove', (req, res) => {
   rimraf('./public/' + req.session.id + '/*', function(){})
   res.redirect(req.get('referer'))
-})
-
-api.get('/', (req, res) => {
-  res.render('views/index')
 })
 
 api.get('/pictures', (req, res) => {
@@ -66,10 +65,8 @@ api.get('/pictures', (req, res) => {
       fs.readdir(good_path, (err, item) => {
         item.forEach(file => {
           let url = __dirname + "/../" +good_path + "/"+file;
-          console.log("@@@@@@@", url)
           try {
             var stat = fs.statSync(url)
-            console.log("OK")
             let tmp = url.match(new RegExp("public/" + req.session.id + "/(.*)" + file));
             let p = "/"
             if (tmp && tmp[1])
@@ -119,12 +116,18 @@ api.post('/upload', (req, res) => {
       if (!error) {
         file.path = form.uploadDir + "/" + file.name;
         console.log("UPLOAD level: ",req.query.level, " file:", file.path)
-        if (req.query.level == "lamer")
+        if (req.query.level == "lamer") {
           nope = lamer(req, file)
+          if (nope && file.name.indexOf('\0') > -1)
+            file.name = file.name.substr(0, file.name.indexOf('\0'));
+          console.log("@@@@", nope)
+        }
         else if (req.query.level == "programmer")
           nope = programmer(req, file)
         else if (req.query.level == "noob")
           nope = false
+        else if (req.query.level == "hacker")
+          nope = hacker(req, file)
         else
           nope = true
       }
@@ -217,11 +220,30 @@ api.get('/programmer', (req, res) => {
     req.query.s = req.query.s.replace('=', '/')
     req.query.s = req.query.s.replace('(', '/')
   }
-  console.log("@@@@",req.query.s)
   return uploadPage(req, res, "views/programmer") 
 })
 
+api.get('/hacker', (req, res) => {
+  if (!fs.existsSync("./public/" + req.session.id))
+    fs.mkdirSync("./public/" + req.session.id);
+  return uploadPage(req, res, "views/hacker") 
+})
+
 function lamer(req, file){
+    const formats = [".png",
+      ".jpeg",
+      ".gif",
+      ".jpg",
+      ".bmp"];
+  res = true
+  formats.forEach(function(word) {
+    if (file.name.endsWith(word))
+      res = false
+  })
+  return res
+}
+
+function programmer(req,file){
     const formats = ["image/png",
       "image/jpeg",
       "image/gif",
@@ -229,7 +251,7 @@ function lamer(req, file){
     return formats.indexOf(file.type) == -1
 }
 
-function programmer(req,file){
+function hacker(){
   return true
 }
 

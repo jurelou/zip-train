@@ -1,1 +1,2 @@
-function alert(a) {console.log("lol")}
+function alert(a) {console.log("😸")}
+function prompt(a) {console.log("😀")}
